@@ -1,0 +1,62 @@
+.ai-analysis-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.ai-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.ai-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.ai-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.ai-status-badge strong {
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.ai-impact-box {
+  background: var(--bg-secondary);
+  border-left: 4px solid var(--accent-success);
+  padding: 16px 20px;
+  border-radius: 0 10px 10px 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ai-analysis-empty {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .ai-analysis-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .ai-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

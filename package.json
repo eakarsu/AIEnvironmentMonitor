@@ -1,0 +1,40 @@
+{
+  "name": "ai-environment-monitor",
+  "version": "1.0.0",
+  "description": "AI-powered Environment Monitor with Weather Impact Analysis, Carbon Footprint Calculator, Recycling Sorter, Energy Optimizer, and Water Quality Monitor",
+  "scripts": {
+    "server": "nodemon --watch server --ext ts --exec ts-node server/index.ts",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "db:setup": "ts-node server/database/setup.ts",
+    "db:seed": "ts-node server/database/seed.ts",
+    "build": "cd client && npm run build"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "node-cache": "^5.1.2",
+    "pg": "^8.11.3",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^20.10.4",
+    "@types/pg": "^8.10.9",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
