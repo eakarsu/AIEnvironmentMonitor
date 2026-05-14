@@ -28,6 +28,14 @@ import adminRoutes from './routes/admin';
 import feedbackRoutes from './routes/feedback';
 import contactRoutes from './routes/contact';
 import docsRoutes from './routes/docs';
+import alertsRoutes from './routes/alerts';
+import aiNewRoutes from './routes/aiNew';
+import aiBacklogRoutes from './routes/aiBacklog';
+import ingestRoutes from './routes/ingest';
+import pdfReportRoutes from './routes/pdfReport';
+import mapRoutes from './routes/map';
+import goalsRoutes from './routes/goals';
+import { startAnomalyWorker } from './services/anomalyWorker';
 
 dotenv.config();
 
@@ -89,6 +97,21 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/docs', docsRoutes);
+app.use('/api/alerts', alertsRoutes);
+app.use('/api/ai', aiNewRoutes);
+// Apply pass 5 — backlog: smart-meter, offset marketplace, leaderboards
+app.use('/api/ai', aiBacklogRoutes);
+app.use('/api/ingest', ingestRoutes);
+app.use('/api/pdf-report', pdfReportRoutes);
+app.use('/api/map', mapRoutes);
+app.use('/api/goals', goalsRoutes);
+app.use('/api/realtime-carbon', require('./routes/realtimeCarbonTracker').default);
+app.use('/api/offset-marketplace', require('./routes/offsetMarketplace').default);
+app.use('/api/scope3-supply-chain', require('./routes/scope3SupplyChain').default);
+app.use('/api/workplace-gamification', require('./routes/workplaceGamification').default);
+app.use('/api/smb-scope-wizard', require('./routes/smbScopeWizard').default);
+app.use('/api/behavioural-nudges', require('./routes/behaviouralNudges').default);
+app.use('/api/utility-api-ingest', require('./routes/utilityApiIngest').default);
 
 // Enhanced Health check
 app.get('/api/health', async (req, res) => {
@@ -114,13 +137,22 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// === Batch 03 Gaps & Frontend Mounts ===
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _batch03 = require('./routes/batch03Gaps');
+  app.use('/api', _batch03);
+} catch (_e) { /* batch03 gap routes optional */ }
+
 // Error handling
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 AI Environment Monitor API Ready\n`);
+  console.log(`\nServer running on http://localhost:${PORT}`);
+  console.log(`AI Environment Monitor API Ready\n`);
+  // Kick off background AI anomaly auto-alerts.
+  startAnomalyWorker();
 });
 
 export default app;

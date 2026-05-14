@@ -13,9 +13,49 @@ interface AIResponse {
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+/**
+ * parseAIJson — 3-strategy JSON parser for AI responses.
+ * Strategy 1: Direct JSON.parse of the entire response.
+ * Strategy 2: Strip ```json ... ``` markdown code fences and parse.
+ * Strategy 3: Greedy extraction of first {...} block via regex.
+ * Returns the parsed object or null if all 3 strategies fail.
+ */
+export function parseAIJson(content: string): any | null {
+  if (!content || typeof content !== 'string') return null;
+
+  // Strategy 1: direct parse
+  try {
+    return JSON.parse(content.trim());
+  } catch {
+    // continue
+  }
+
+  // Strategy 2: strip ```json ... ``` or ``` ... ``` fences
+  try {
+    const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fenced && fenced[1]) {
+      return JSON.parse(fenced[1].trim());
+    }
+  } catch {
+    // continue
+  }
+
+  // Strategy 3: greedy extraction of first JSON-like block
+  try {
+    const match = content.match(/\{[\s\S]*\}/);
+    if (match) {
+      return JSON.parse(match[0]);
+    }
+  } catch {
+    // continue
+  }
+
+  return null;
+}
+
 export const analyzeWithAI = async (prompt: string, context: string): Promise<AIResponse> => {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5';
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022';
 
   if (!apiKey || apiKey === 'your_openrouter_api_key_here') {
     return {
@@ -32,7 +72,7 @@ export const analyzeWithAI = async (prompt: string, context: string): Promise<AI
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:3000',
+        'HTTP-Referer': process.env.APP_URL || 'https://api.example.com',
         'X-Title': 'AI Environment Monitor'
       },
       body: JSON.stringify({
@@ -71,29 +111,14 @@ export const analyzeWithAI = async (prompt: string, context: string): Promise<AI
     const data: any = await response.json();
     const aiContent = data.choices?.[0]?.message?.content || '';
 
-    // Try to parse JSON response
-    let parsedResponse;
-    try {
-      // Find JSON in the response
-      const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsedResponse = JSON.parse(jsonMatch[0]);
-      } else {
-        parsedResponse = {
-          analysis: aiContent,
-          recommendations: [],
-          severity: 'medium',
-          confidence: 0.7
-        };
-      }
-    } catch {
-      parsedResponse = {
-        analysis: aiContent,
-        recommendations: [],
-        severity: 'medium',
-        confidence: 0.7
-      };
-    }
+    // Use 3-strategy parser
+    const parsed = parseAIJson(aiContent);
+    const parsedResponse = parsed || {
+      analysis: aiContent,
+      recommendations: [],
+      severity: 'medium',
+      confidence: 0.7
+    };
 
     return {
       success: true,

@@ -6,8 +6,30 @@ import pool from '../database/db';
 import { loginValidation, registerValidation } from '../middleware/validation';
 import { authLimiter } from '../middleware/rateLimiter';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { sendMail, buildPasswordResetEmail, buildVerificationEmail } from '../services/mailer';
 
 const router = express.Router();
+
+/**
+ * Resolve the JWT secret with strict production handling.
+ * - In production: missing JWT_SECRET throws (refuses to issue insecure tokens).
+ * - In dev/test: falls back to a stable random per-process secret with a warning,
+ *   so existing test suites still function but no insecure literal escapes.
+ */
+let cachedDevSecret: string | null = null;
+function getJwtSecret(): string {
+  const fromEnv = process.env.JWT_SECRET;
+  if (fromEnv && fromEnv.length >= 16) return fromEnv;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  if (!cachedDevSecret) {
+    cachedDevSecret = crypto.randomBytes(48).toString('hex');
+    // eslint-disable-next-line no-console
+    console.warn('[auth] JWT_SECRET unset — using ephemeral dev secret. Set JWT_SECRET to persist tokens across restarts.');
+  }
+  return cachedDevSecret;
+}
 
 // Login
 router.post('/login', authLimiter, loginValidation as any, async (req: express.Request, res: express.Response) => {
@@ -27,8 +49,8 @@ router.post('/login', authLimiter, loginValidation as any, async (req: express.R
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET || 'secret',
+      { id: user.id, email: user.email, role: user.role || 'user' },
+      getJwtSecret(),
       { expiresIn: '24h' }
     );
 
@@ -68,8 +90,13 @@ router.post('/register', authLimiter, registerValidation as any, async (req: exp
     const user = result.rows[0];
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET || 'secret',
+      getJwtSecret(),
       { expiresIn: '24h' }
+    );
+
+    // Send verification email (non-blocking)
+    sendMail(buildVerificationEmail(verificationToken, email)).catch(err =>
+      console.error('[Register] Verification email error:', err.message)
     );
 
     res.status(201).json({ token, user });
@@ -105,8 +132,13 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
       [user.rows[0].id, token, expires]
     );
 
-    // In production, send email here
-    res.json({ message: 'If the email exists, a reset link has been sent', token });
+    // Send password reset email (non-blocking)
+    const { email: userEmail } = req.body;
+    sendMail(buildPasswordResetEmail(token, userEmail)).catch(err =>
+      console.error('[ForgotPassword] Email error:', err.message)
+    );
+
+    res.json({ message: 'If the email exists, a reset link has been sent' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to process password reset' });
   }
@@ -159,12 +191,20 @@ router.post('/verify-email', async (req, res) => {
 router.post('/resend-verification', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const token = crypto.randomBytes(32).toString('hex');
+    const userResult = await pool.query('SELECT email FROM users WHERE id = $1', [req.user!.id]);
     await pool.query(
       'UPDATE users SET verification_token = $1 WHERE id = $2',
       [token, req.user!.id]
     );
-    // In production, send email here
-    res.json({ message: 'Verification email resent', token });
+
+    // Send verification email (non-blocking)
+    if (userResult.rows.length > 0) {
+      sendMail(buildVerificationEmail(token, userResult.rows[0].email)).catch(err =>
+        console.error('[ResendVerification] Email error:', err.message)
+      );
+    }
+
+    res.json({ message: 'Verification email resent' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to resend verification' });
   }
@@ -175,7 +215,7 @@ router.post('/refresh', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const newToken = jwt.sign(
       { id: req.user!.id, email: req.user!.email },
-      process.env.JWT_SECRET || 'secret',
+      getJwtSecret(),
       { expiresIn: '24h' }
     );
     res.json({ token: newToken });

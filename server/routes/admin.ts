@@ -6,6 +6,9 @@ const router = express.Router();
 
 const requireAdmin = async (req: AuthRequest, res: express.Response, next: express.NextFunction) => {
   try {
+    // Fast path: trust JWT-embedded role.
+    if (req.user?.role === 'admin') return next();
+    // Fallback: verify against DB for legacy tokens missing the role claim.
     const result = await pool.query('SELECT role FROM users WHERE id = $1', [req.user!.id]);
     if (result.rows.length === 0 || result.rows[0].role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });

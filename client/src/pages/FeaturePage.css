@@ -192,3 +192,38 @@
     width: 100%;
   }
 }
+
+/* New page utilities for AI Goals / Map / PDF Reports */
+.app-shell { display: flex; min-height: 100vh; }
+.feature-main { flex: 1; padding: 24px; overflow: auto; }
+.feature-header h1 { margin: 0 0 4px 0; }
+.feature-header p { margin: 0 0 16px 0; opacity: 0.8; }
+.feature-card {
+  background: var(--card-bg, #1e2733);
+  border: 1px solid var(--card-border, #303a48);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.feature-card h2 { margin: 0 0 12px 0; font-size: 1.1rem; }
+.feature-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
+.feature-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
+.feature-form input, .feature-form select {
+  padding: 8px; border-radius: 6px; border: 1px solid var(--card-border, #303a48);
+  background: var(--input-bg, #0e141b); color: inherit;
+}
+.feature-list { list-style: none; padding: 0; margin: 0; }
+.feature-list-item {
+  border: 1px solid var(--card-border, #303a48);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.feature-list-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.feature-sublist { margin: 8px 0 8px 16px; padding: 0; font-size: 0.9rem; }
+.feature-list-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-primary { background: #198754; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-secondary { background: #0d6efd; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; }
+.btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-danger { background: #dc3545; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; }

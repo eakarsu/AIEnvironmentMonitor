@@ -72,6 +72,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     { id: 'search', title: 'Global Search', description: 'Search across all environmental data', icon: '🔍', path: '/search', gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' },
     { id: 'feedback', title: 'Feedback', description: 'Share your experience and suggestions', icon: '💬', path: '/feedback', gradient: 'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)' },
     { id: 'contact', title: 'Contact & Support', description: 'Get help and submit support tickets', icon: '📧', path: '/contact', gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
+    { id: 'ai-results', title: 'AI Results History', description: 'Browse all persisted AI insights and forecasts', icon: '🤖', path: '/ai-results', gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
   ];
 
   return (

@@ -2,25 +2,30 @@ import express from 'express';
 import pool from '../database/db';
 import { analyzeWeatherImpact } from '../services/openrouter';
 import { weatherValidation } from '../middleware/validation';
+import { aiRateLimiter } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
 // Get all weather impacts (with pagination)
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 0;
-    const limit = parseInt(req.query.limit as string) || 0;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+    const offset = (page - 1) * limit;
 
-    if (page > 0 && limit > 0) {
-      const offset = (page - 1) * limit;
-      const countResult = await pool.query('SELECT COUNT(*) FROM weather_impacts');
-      const total = parseInt(countResult.rows[0].count);
-      const result = await pool.query('SELECT * FROM weather_impacts ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
-      return res.json({ data: result.rows, total, page, totalPages: Math.ceil(total / limit) });
-    }
+    const countResult = await pool.query('SELECT COUNT(*) FROM weather_impacts');
+    const total = parseInt(countResult.rows[0].count);
+    const result = await pool.query('SELECT * FROM weather_impacts ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
 
-    const result = await pool.query('SELECT * FROM weather_impacts ORDER BY created_at DESC');
-    res.json(result.rows);
+    res.json({
+      data: result.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error: any) {
     console.error('Error fetching weather impacts:', error);
     res.status(500).json({ error: 'Failed to fetch weather impacts' });
@@ -105,7 +110,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // AI Analysis endpoint
-router.post('/:id/analyze', async (req, res) => {
+router.post('/:id/analyze', aiRateLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM weather_impacts WHERE id = $1', [id]);

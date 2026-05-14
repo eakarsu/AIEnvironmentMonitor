@@ -2,6 +2,7 @@ import express from 'express';
 import pool from '../database/db';
 import { analyzeEnergyUsage } from '../services/openrouter';
 import { energyValidation } from '../middleware/validation';
+import { aiRateLimiter } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
@@ -105,7 +106,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // AI Analysis endpoint
-router.post('/:id/analyze', async (req, res) => {
+router.post('/:id/analyze', aiRateLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM energy_usages WHERE id = $1', [id]);

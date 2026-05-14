@@ -11,6 +11,7 @@
     "build": "cd client && npm run build"
   },
   "dependencies": {
+    "@types/pdfkit": "^0.17.6",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -21,6 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "node-cache": "^5.1.2",
+    "pdfkit": "^0.18.0",
     "pg": "^8.11.3",
     "winston": "^3.19.0"
   },

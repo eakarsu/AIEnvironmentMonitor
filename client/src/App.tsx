@@ -16,9 +16,17 @@ import ForgotPassword from './pages/ForgotPassword';
 import AdminPanel from './pages/AdminPanel';
 import Contact from './pages/Contact';
 import Feedback from './pages/Feedback';
+import AIResults from './pages/AIResults';
+import AIInsights from './pages/AIInsights';
+import AIBacklog from './pages/AIBacklog';
+import Goals from './pages/Goals';
+import MapView from './pages/MapView';
+import PdfReports from './pages/PdfReports';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import OnboardingTour from './components/OnboardingTour';
+
+import Batch03Features from './pages/Batch03Features';
 
 interface User {
   id: number;
@@ -70,6 +78,7 @@ function App() {
       {user && <OnboardingTour />}
       <a href="#main-content" className="skip-to-content">Skip to content</a>
       <Routes>
+          <Route path="/batch03" element={<Batch03Features />} />
         <Route
           path="/login"
           element={
@@ -164,6 +173,42 @@ function App() {
           path="/feedback"
           element={
             user ? <Feedback user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/ai-results"
+          element={
+            user ? <AIResults user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/ai-insights"
+          element={
+            user ? <AIInsights user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/ai-backlog"
+          element={
+            user ? <AIBacklog user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/goals"
+          element={
+            user ? <Goals user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/map"
+          element={
+            user ? <MapView user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            user ? <PdfReports user={user} onLogout={handleLogout} /> : <Navigate to="/login" />
           }
         />
         <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />

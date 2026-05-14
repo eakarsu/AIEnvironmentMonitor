@@ -228,6 +228,23 @@ const setupDatabase = async () => {
         size INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      -- AI Results table (persisted parsed AI responses)
+      CREATE TABLE IF NOT EXISTS ai_results (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        analysis_type VARCHAR(100) NOT NULL,
+        domain VARCHAR(100),
+        entity_id VARCHAR(100),
+        result JSONB NOT NULL,
+        model_used VARCHAR(200) DEFAULT 'anthropic/claude-3-5-sonnet-20241022',
+        confidence NUMERIC(3,2),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_ai_results_user ON ai_results(user_id);
+      CREATE INDEX IF NOT EXISTS idx_ai_results_type ON ai_results(analysis_type);
+      CREATE INDEX IF NOT EXISTS idx_ai_results_created ON ai_results(created_at DESC);
     `);
 
     console.log('✓ All tables created successfully');
