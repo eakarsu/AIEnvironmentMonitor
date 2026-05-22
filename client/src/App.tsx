@@ -27,6 +27,10 @@ import TermsOfService from './pages/TermsOfService';
 import OnboardingTour from './components/OnboardingTour';
 
 import Batch03Features from './pages/Batch03Features';
+import CommunityCarbonBudget from './pages/CommunityCarbonBudget';
+
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
 
 interface User {
   id: number;
@@ -78,7 +82,11 @@ function App() {
       {user && <OnboardingTour />}
       <a href="#main-content" className="skip-to-content">Skip to content</a>
       <Routes>
+        <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
+        <Route path="/codex/operations" element={<CodexOperationsFeature />} />
+
           <Route path="/batch03" element={<Batch03Features />} />
+          <Route path="/community-carbon-budget" element={user ? <CommunityCarbonBudget /> : <Navigate to="/login" />} />
         <Route
           path="/login"
           element={

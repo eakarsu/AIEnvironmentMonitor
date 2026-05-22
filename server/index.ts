@@ -113,6 +113,24 @@ app.use('/api/smb-scope-wizard', require('./routes/smbScopeWizard').default);
 app.use('/api/behavioural-nudges', require('./routes/behaviouralNudges').default);
 app.use('/api/utility-api-ingest', require('./routes/utilityApiIngest').default);
 
+app.post('/api/community-carbon-budget/score', (req, res) => {
+  const body = req.body || {};
+  const kwh = Number(body.monthly_kwh || 0);
+  const water = Number(body.water_gal || 0);
+  const waste = Number(body.waste_tons || 0);
+  const target = Number(body.target_reduction_pct || 10);
+  const baseline = kwh * 0.00038 + water * 0.000002 + waste * 0.45;
+  const targetTons = baseline * (1 - target / 100);
+  res.json({
+    community: body.community || 'community',
+    baseline_tco2e: Number(baseline.toFixed(2)),
+    target_tco2e: Number(targetTons.toFixed(2)),
+    reduction_needed_tco2e: Number((baseline - targetTons).toFixed(2)),
+    actions: ['Shift top electricity loads to lower-carbon windows.', 'Prioritize leak detection.', 'Move organics and cardboard into diversion streams.'],
+    generated_at: new Date().toISOString(),
+  });
+});
+
 // Enhanced Health check
 app.get('/api/health', async (req, res) => {
   try {
