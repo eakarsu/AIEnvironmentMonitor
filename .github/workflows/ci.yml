@@ -7,9 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:15
@@ -17,46 +16,32 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: ai_environment_monitor
-        ports:
-          - 5432:5432
+        ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install root dependencies
-        run: npm install
-
-      - name: Install client dependencies
-        run: cd client && npm install
-
-      - name: Setup database
-        run: npm run db:setup
+          node-version: 20
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci && npm ci --prefix client
+      - name: Set up base schema and governed migrations
         env:
+          NODE_ENV: test
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres
           DB_PASSWORD: postgres
           DB_NAME: ai_environment_monitor
-
-      - name: Seed database
-        run: npm run db:seed
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: ai_environment_monitor
-
+        run: npm run db:setup && PGPASSWORD=postgres psql -h localhost -U postgres -d ai_environment_monitor -v ON_ERROR_STOP=1 -f server/database/migrations/001_governed_investigations.sql
+      - name: Test and typecheck backend
+        run: npm test && npm run typecheck
       - name: Build client
-        run: npm run build
+        run: npm run build --prefix client
+      - name: Check operational scripts
+        run: bash -n start.sh scripts/*.sh

@@ -35,6 +35,7 @@ import ingestRoutes from './routes/ingest';
 import pdfReportRoutes from './routes/pdfReport';
 import mapRoutes from './routes/map';
 import goalsRoutes from './routes/goals';
+import governedInvestigationRoutes from './routes/governedInvestigations';
 import { startAnomalyWorker } from './services/anomalyWorker';
 
 dotenv.config();
@@ -105,6 +106,7 @@ app.use('/api/ingest', ingestRoutes);
 app.use('/api/pdf-report', pdfReportRoutes);
 app.use('/api/map', mapRoutes);
 app.use('/api/goals', goalsRoutes);
+app.use('/api/governed-investigations', governedInvestigationRoutes);
 app.use('/api/realtime-carbon', require('./routes/realtimeCarbonTracker').default);
 app.use('/api/offset-marketplace', require('./routes/offsetMarketplace').default);
 app.use('/api/scope3-supply-chain', require('./routes/scope3SupplyChain').default);
@@ -154,13 +156,6 @@ app.get('/api/health', async (req, res) => {
     });
   }
 });
-
-// === Batch 03 Gaps & Frontend Mounts ===
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const _batch03 = require('./routes/batch03Gaps');
-  app.use('/api', _batch03);
-} catch (_e) { /* batch03 gap routes optional */ }
 
 // Error handling
 app.use(notFoundHandler);

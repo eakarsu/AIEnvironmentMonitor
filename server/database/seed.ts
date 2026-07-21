@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (process.env.NODE_ENV === 'production') throw new Error('Demo seed is disabled in production');
+
 const seedDatabase = async () => {
   const pool = new Pool({
     host: process.env.DB_HOST || 'localhost',

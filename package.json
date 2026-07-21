@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "AI-powered Environment Monitor with Weather Impact Analysis, Carbon Footprint Calculator, Recycling Sorter, Energy Optimizer, and Water Quality Monitor",
   "scripts": {
+    "start": "ts-node server/index.ts",
     "server": "nodemon --watch server --ext ts --exec ts-node server/index.ts",
     "client": "cd client && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "db:setup": "ts-node server/database/setup.ts",
     "db:seed": "ts-node server/database/seed.ts",
-    "build": "cd client && npm run build"
+    "build": "cd client && npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test server/tests/*.test.js"
   },
   "dependencies": {
     "@types/pdfkit": "^0.17.6",
