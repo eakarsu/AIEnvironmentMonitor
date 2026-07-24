@@ -11,7 +11,7 @@ interface AIResponse {
   rawResponse?: any;
 }
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_API_URL = `${(process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '')}/chat/completions`;
 
 /**
  * parseAIJson — 3-strategy JSON parser for AI responses.

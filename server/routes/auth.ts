@@ -114,6 +114,19 @@ router.get('/demo', (req, res) => {
   });
 });
 
+router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, name, role, created_at FROM users WHERE id = $1',
+      [req.user!.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ error: 'User not found' });
+    return res.json({ user: result.rows[0] });
+  } catch {
+    return res.status(500).json({ error: 'Failed to get user' });
+  }
+});
+
 // Forgot Password
 router.post('/forgot-password', authLimiter, async (req, res) => {
   try {
