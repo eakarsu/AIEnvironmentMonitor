@@ -6,6 +6,12 @@ dotenv.config();
 
 if (process.env.NODE_ENV === 'production') throw new Error('Demo seed is disabled in production');
 
+function requireDemoPassword() {
+  const password = process.env.DEMO_PASSWORD || process.env.SEED_DEMO_PASSWORD || process.env.DEMO_SEED_PASSWORD || '';
+  if (password.length < 12 || password.length > 1024) throw new Error('DEMO_PASSWORD must contain 12-1024 characters');
+  return password;
+}
+
 const seedDatabase = async () => {
   const pool = new Pool({
     host: process.env.DB_HOST || 'localhost',
@@ -25,7 +31,7 @@ const seedDatabase = async () => {
     console.log('✓ Cleared existing data');
 
     // Seed Users
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash(requireDemoPassword(), 10);
     await pool.query(`
       INSERT INTO users (email, password, name, role, email_verified) VALUES
       ('demo@example.com', $1, 'Demo User', 'user', true),

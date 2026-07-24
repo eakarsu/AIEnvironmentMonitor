@@ -33,8 +33,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setEmail(response.data.email);
       setPassword(response.data.password);
     } catch {
-      setEmail('demo@example.com');
-      setPassword('password123');
+      setEmail(process.env.REACT_APP_DEMO_EMAIL || '');
+      setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
     }
   };
 
