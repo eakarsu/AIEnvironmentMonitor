@@ -41,7 +41,7 @@ const en = {
     password: 'Password',
     forgotPassword: 'Forgot Password?',
     resetPassword: 'Reset Password',
-    demoCredentials: 'Fill Demo Credentials',
+    demoCredentials: 'Auto Fill Demo Credentials',
   },
   dashboard: {
     welcome: 'Welcome back',

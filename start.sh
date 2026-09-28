@@ -64,6 +64,8 @@ for port in "${PORT:-${BACKEND_PORT:-3001}}" "${FRONTEND_PORT:-${CLIENT_PORT:-30
 done
 if [[ "${MIGRATE_ON_START:-false}" == "true" ]]; then
   npm run db:setup
+fi
+if [[ "${NODE_ENV:-development}" != "production" && "${ENABLE_DEMO_CREDENTIAL_AUTOFILL:-true}" == "true" ]]; then
   npx ts-node server/database/provisionAdmin.ts
 fi
 

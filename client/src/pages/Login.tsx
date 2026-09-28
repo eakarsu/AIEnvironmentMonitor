@@ -86,7 +86,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary login-btn" disabled={loading}>
+            <button
+              type="button"
+              className="btn btn-secondary login-demo-btn"
+              onClick={fillDemoCredentials}
+              aria-label="Auto Fill Demo Credentials"
+            >
+              <span>✨</span>
+              Auto Fill Demo Credentials
+            </button>
+
+            <button type="submit" className="btn btn-primary login-btn" disabled={loading} aria-label="Sign In">
               {loading ? (
                 <>
                   <span className="btn-spinner"></span>
@@ -98,15 +108,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   Sign In
                 </>
               )}
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-secondary login-demo-btn"
-              onClick={fillDemoCredentials}
-            >
-              <span>✨</span>
-              Fill Demo Credentials
             </button>
 
             <div style={{ textAlign: 'center', marginTop: '12px' }}>

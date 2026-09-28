@@ -108,9 +108,15 @@ router.post('/register', authLimiter, registerValidation as any, async (req: exp
 
 // Get demo credentials
 router.get('/demo', (req, res) => {
+  if (process.env.NODE_ENV === 'production' || process.env.ENABLE_DEMO_CREDENTIAL_AUTOFILL === 'false') {
+    return res.status(404).json({ error: 'Demo credentials are unavailable' });
+  }
+  const email = process.env.DEMO_EMAIL;
+  const password = process.env.DEMO_PASSWORD;
+  if (!email || !password) return res.status(503).json({ error: 'Demo credentials are not configured' });
   res.json({
-    email: 'demo@example.com',
-    password: 'password123'
+    email,
+    password
   });
 });
 

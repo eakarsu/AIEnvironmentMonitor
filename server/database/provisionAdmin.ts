@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs';
 import pool from './db';
 
 async function main() {
-  const email = String(process.env.PROVISION_ADMIN_EMAIL || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const password = process.env.PROVISION_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+  const email = String(process.env.PROVISION_ADMIN_EMAIL || process.env.ADMIN_EMAIL || process.env.DEMO_EMAIL || '').trim().toLowerCase();
+  const password = process.env.PROVISION_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || process.env.DEMO_PASSWORD;
   if (!email || !password || password.length < 12) {
     throw new Error('PROVISION_ADMIN_EMAIL and a password of at least 12 characters are required');
   }
