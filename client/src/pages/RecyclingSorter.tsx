@@ -134,15 +134,14 @@ const RecyclingSorter: React.FC<RecyclingSorterProps> = ({ user, onLogout }) => 
     setShowDetailModal(true);
   };
 
-  const loadSampleData = () => {
-    setFormData({
-      item_name: 'Plastic Water Bottle',
-      material_type: 'PET Plastic #1',
-      category: 'Plastic',
-      recyclable: true,
-      special_instructions: 'Remove cap and label, rinse clean before recycling',
-      environmental_impact: 'Medium'
-    });
+  const sampleLabels = ['Plastic bottle', 'Cardboard box', 'Used battery'];
+  const loadSampleData = (variant: number) => {
+    const samples = [
+      { item_name: 'Plastic water bottle', material_type: 'PET plastic #1', category: 'Plastic', recyclable: true, special_instructions: 'Empty and rinse; follow local guidance for caps.', environmental_impact: 'Medium' },
+      { item_name: 'Shipping box', material_type: 'Corrugated cardboard', category: 'Paper', recyclable: true, special_instructions: 'Flatten and keep dry before curbside collection.', environmental_impact: 'Low' },
+      { item_name: 'Used lithium-ion battery', material_type: 'Lithium-ion', category: 'Hazardous', recyclable: false, special_instructions: 'Take to an approved battery collection point; do not place in curbside bins.', environmental_impact: 'High' }
+    ];
+    setFormData(samples[variant]);
   };
 
   const closeModal = () => {
@@ -250,11 +249,11 @@ const RecyclingSorter: React.FC<RecyclingSorterProps> = ({ user, onLogout }) => 
             <div className="modal-header">
               <h2 className="modal-title">{isEditing ? 'Edit Recycling Item' : 'Add Recycling Item'}</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {!isEditing && (
-                  <button type="button" className="btn btn-sm btn-success" onClick={loadSampleData}>
-                    Load Sample
+                {!isEditing && sampleLabels.map((label, variant) => (
+                  <button key={label} type="button" className="btn btn-sm btn-success" onClick={() => loadSampleData(variant)}>
+                    {label} sample
                   </button>
-                )}
+                ))}
                 <button className="modal-close" onClick={closeModal}>&times;</button>
               </div>
             </div>

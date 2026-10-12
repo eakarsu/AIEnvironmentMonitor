@@ -150,19 +150,14 @@ const WaterQuality: React.FC<WaterQualityProps> = ({ user, onLogout }) => {
     setShowDetailModal(true);
   };
 
-  const loadSampleData = () => {
-    setFormData({
-      source_name: 'City Municipal Supply',
-      location: 'Downtown Station',
-      sample_date: new Date().toISOString().split('T')[0],
-      ph_level: '7.2',
-      turbidity: '0.45',
-      dissolved_oxygen: '8.5',
-      nitrate_level: '3.2',
-      lead_level: '0.001',
-      bacteria_count: '0',
-      quality_index: 'Good'
-    });
+  const sampleLabels = ['Municipal', 'Reservoir', 'River'];
+  const loadSampleData = (variant: number) => {
+    const samples = [
+      { source_name: 'City municipal supply', location: 'Downtown station', sample_date: new Date().toISOString().split('T')[0], ph_level: '7.2', turbidity: '0.45', dissolved_oxygen: '8.5', nitrate_level: '3.2', lead_level: '0.001', bacteria_count: '0', quality_index: 'Good' },
+      { source_name: 'North reservoir', location: 'Reservoir inlet', sample_date: new Date().toISOString().split('T')[0], ph_level: '6.8', turbidity: '2.1', dissolved_oxygen: '7.4', nitrate_level: '4.8', lead_level: '0.002', bacteria_count: '12', quality_index: 'Fair' },
+      { source_name: 'East river', location: 'Bridge sampling point', sample_date: new Date().toISOString().split('T')[0], ph_level: '7.6', turbidity: '5.2', dissolved_oxygen: '6.1', nitrate_level: '7.0', lead_level: '0.003', bacteria_count: '85', quality_index: 'Poor' }
+    ];
+    setFormData(samples[variant]);
   };
 
   const closeModal = () => {
@@ -283,11 +278,11 @@ const WaterQuality: React.FC<WaterQualityProps> = ({ user, onLogout }) => {
             <div className="modal-header">
               <h2 className="modal-title">{isEditing ? 'Edit Water Sample' : 'Add Water Sample'}</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {!isEditing && (
-                  <button type="button" className="btn btn-sm btn-success" onClick={loadSampleData}>
-                    Load Sample
+                {!isEditing && sampleLabels.map((label, variant) => (
+                  <button key={label} type="button" className="btn btn-sm btn-success" onClick={() => loadSampleData(variant)}>
+                    {label} sample
                   </button>
-                )}
+                ))}
                 <button className="modal-close" onClick={closeModal}>&times;</button>
               </div>
             </div>

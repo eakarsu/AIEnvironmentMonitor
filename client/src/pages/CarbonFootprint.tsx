@@ -142,17 +142,14 @@ const CarbonFootprint: React.FC<CarbonFootprintProps> = ({ user, onLogout }) => 
     setShowDetailModal(true);
   };
 
-  const loadSampleData = () => {
-    setFormData({
-      activity_name: 'Daily Commute',
-      category: 'Transportation',
-      emission_source: 'Gasoline Car',
-      co2_kg: '8.5',
-      ch4_kg: '0.012',
-      n2o_kg: '0.001',
-      total_co2e: '8.87',
-      date: new Date().toISOString().split('T')[0]
-    });
+  const sampleLabels = ['Commute', 'Office energy', 'Food waste'];
+  const loadSampleData = (variant: number) => {
+    const samples = [
+      { activity_name: 'Daily commute', category: 'Transportation', emission_source: 'Gasoline car', co2_kg: '8.5', ch4_kg: '0.012', n2o_kg: '0.001', total_co2e: '9.10', date: new Date().toISOString().split('T')[0] },
+      { activity_name: 'Office electricity', category: 'Energy', emission_source: 'Grid electricity', co2_kg: '13.2', ch4_kg: '0.004', n2o_kg: '0.001', total_co2e: '13.58', date: new Date().toISOString().split('T')[0] },
+      { activity_name: 'Cafeteria food waste', category: 'Waste', emission_source: 'Landfilled organics', co2_kg: '4.0', ch4_kg: '0.08', n2o_kg: '0.001', total_co2e: '6.51', date: new Date().toISOString().split('T')[0] }
+    ];
+    setFormData(samples[variant]);
   };
 
   const closeModal = () => {
@@ -247,11 +244,11 @@ const CarbonFootprint: React.FC<CarbonFootprintProps> = ({ user, onLogout }) => 
             <div className="modal-header">
               <h2 className="modal-title">{isEditing ? 'Edit Carbon Activity' : 'Add Carbon Activity'}</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {!isEditing && (
-                  <button type="button" className="btn btn-sm btn-success" onClick={loadSampleData}>
-                    Load Sample
+                {!isEditing && sampleLabels.map((label, variant) => (
+                  <button key={label} type="button" className="btn btn-sm btn-success" onClick={() => loadSampleData(variant)}>
+                    {label} sample
                   </button>
-                )}
+                ))}
                 <button className="modal-close" onClick={closeModal}>&times;</button>
               </div>
             </div>

@@ -142,17 +142,14 @@ const EnergyOptimizer: React.FC<EnergyOptimizerProps> = ({ user, onLogout }) => 
     setShowDetailModal(true);
   };
 
-  const loadSampleData = () => {
-    setFormData({
-      device_name: 'Central Air Conditioner',
-      category: 'HVAC',
-      power_watts: '3500',
-      usage_hours: '8',
-      daily_kwh: '28',
-      monthly_kwh: '840',
-      monthly_cost: '126.00',
-      efficiency_rating: 'B'
-    });
+  const sampleLabels = ['Air conditioning', 'Office lighting', 'Water heater'];
+  const loadSampleData = (variant: number) => {
+    const samples = [
+      { device_name: 'Central air conditioner', category: 'HVAC', power_watts: '3500', usage_hours: '8', daily_kwh: '28', monthly_kwh: '840', monthly_cost: '126.00', efficiency_rating: 'B' },
+      { device_name: 'Office LED lighting', category: 'Office', power_watts: '240', usage_hours: '10', daily_kwh: '2.4', monthly_kwh: '72', monthly_cost: '10.80', efficiency_rating: 'A' },
+      { device_name: 'Electric water heater', category: 'Water Heating', power_watts: '4500', usage_hours: '2', daily_kwh: '9', monthly_kwh: '270', monthly_cost: '40.50', efficiency_rating: 'C' }
+    ];
+    setFormData(samples[variant]);
   };
 
   const closeModal = () => {
@@ -265,11 +262,11 @@ const EnergyOptimizer: React.FC<EnergyOptimizerProps> = ({ user, onLogout }) => 
             <div className="modal-header">
               <h2 className="modal-title">{isEditing ? 'Edit Device' : 'Add Device'}</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {!isEditing && (
-                  <button type="button" className="btn btn-sm btn-success" onClick={loadSampleData}>
-                    Load Sample
+                {!isEditing && sampleLabels.map((label, variant) => (
+                  <button key={label} type="button" className="btn btn-sm btn-success" onClick={() => loadSampleData(variant)}>
+                    {label} sample
                   </button>
-                )}
+                ))}
                 <button className="modal-close" onClick={closeModal}>&times;</button>
               </div>
             </div>

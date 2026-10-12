@@ -1,3 +1,5 @@
+import FormattedAIReport from "../components/FormattedAIReport";
+import { reportText, reportValue } from "../components/FormattedAIReport";
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -63,13 +65,9 @@ const AIResults: React.FC<AIResultsProps> = ({ user, onLogout }) => {
   };
 
   const renderResultPreview = (result: any) => {
-    if (!result) return 'No result';
-    if (typeof result === 'string') return result.substring(0, 200);
-    if (result.analysis) {
-      const a = typeof result.analysis === 'string' ? result.analysis : JSON.stringify(result.analysis);
-      return a.substring(0, 200);
-    }
-    return JSON.stringify(result).substring(0, 200);
+    if (result === null || result === undefined) return 'No result';
+    const summary = reportText(reportValue(result)).replace(/\s+/g, ' ');
+    return summary.length > 200 ? `${summary.slice(0, 200)}…` : summary;
   };
 
   return (
@@ -135,7 +133,7 @@ const AIResults: React.FC<AIResultsProps> = ({ user, onLogout }) => {
                 </div>
                 {row.domain && <div>Domain: {row.domain}</div>}
                 {row.confidence !== null && <div>Confidence: {row.confidence}</div>}
-                <p>{renderResultPreview(row.result)}{(JSON.stringify(row.result).length > 200) ? '…' : ''}</p>
+                <p>{renderResultPreview(row.result)}</p>
               </div>
             ))}
           </div>
@@ -186,9 +184,7 @@ const AIResults: React.FC<AIResultsProps> = ({ user, onLogout }) => {
               {selected.domain && <p>Domain: {selected.domain}</p>}
               <p>Model: {selected.model_used}</p>
               {selected.confidence !== null && <p>Confidence: {selected.confidence}</p>}
-              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {JSON.stringify(selected.result, null, 2)}
-              </pre>
+              <FormattedAIReport response={selected.result} />
               <button onClick={() => setSelected(null)}>Close</button>
             </div>
           </div>

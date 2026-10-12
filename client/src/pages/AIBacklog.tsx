@@ -1,3 +1,4 @@
+import FormattedAIReport from "../components/FormattedAIReport";
 /**
  * Apply pass 5 — backlog UI for AIEnvironmentMonitor.
  * Surfaces /api/ai/smart-meter, /api/ai/offset-marketplace, /api/ai/leaderboard.
@@ -5,6 +6,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './FeaturePage.css';
+import NativeAIControls from '../components/NativeAIControls';
+import useNativeAIRequest from '../components/useNativeAIRequest';
 
 interface User { id: number; email: string; name: string; }
 interface Props { user: User; onLogout: () => void; }
@@ -12,6 +15,7 @@ interface Props { user: User; onLogout: () => void; }
 type Tool = 'smart-meter' | 'offsets' | 'leaderboard';
 
 const AIBacklog: React.FC<Props> = ({ user, onLogout }) => {
+  const nativeAIRequest = useNativeAIRequest();
   const [tool, setTool] = useState<Tool>('smart-meter');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +28,8 @@ const AIBacklog: React.FC<Props> = ({ user, onLogout }) => {
   const [tonnes, setTonnes] = useState<number>(2);
   const [vendorId, setVendorId] = useState<string>('verra-vcs');
   const [intentNotes, setIntentNotes] = useState<string>('');
+  const [rankingTonnes, setRankingTonnes] = useState<number>(2);
+  const [rankingPreferences, setRankingPreferences] = useState<string>('');
 
   // leaderboard
   const [metric, setMetric] = useState<string>('lowest-carbon');
@@ -46,6 +52,16 @@ const AIBacklog: React.FC<Props> = ({ user, onLogout }) => {
       else setError(msg);
     } finally { setLoading(false); }
   };
+  const rankOffsets = async () => {
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const response = await nativeAIRequest.run((signal) => axios.post('/api/ai/offset-marketplace/match', {
+        tonnes_co2e: rankingTonnes, preferences: { priorities: rankingPreferences },
+      }, { headers: headers(), signal }));
+      setResult(response.data);
+    } catch (error: any) { setError(error.response?.data?.error || error.message || 'Ranking could not be generated.'); }
+    finally { setLoading(false); }
+  };
 
   return (
     <div className="feature-page">
@@ -63,7 +79,7 @@ const AIBacklog: React.FC<Props> = ({ user, onLogout }) => {
       <div style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           {(['smart-meter', 'offsets', 'leaderboard'] as Tool[]).map((t) => (
-            <button key={t} onClick={() => { setTool(t); setError(null); setResult(null); }} style={{ padding: '6px 12px', background: tool === t ? '#10b981' : '#374151', color: '#fff', border: 0, borderRadius: 4 }}>
+            <button key={t} onClick={() => { nativeAIRequest.cancel(); setLoading(false); setTool(t); setError(null); setResult(null); }} style={{ padding: '6px 12px', background: tool === t ? '#10b981' : '#374151', color: '#fff', border: 0, borderRadius: 4 }}>
               {t}
             </button>
           ))}
@@ -105,10 +121,16 @@ const AIBacklog: React.FC<Props> = ({ user, onLogout }) => {
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => handle(async () => (await axios.get('/api/ai/offset-marketplace/vendors', { headers: headers() })).data)} disabled={loading}>List vendors</button>
-              <button onClick={() => handle(async () => (await axios.post('/api/ai/offset-marketplace/match', { tonnes_co2e: tonnes, preferences: {} }, { headers: headers() })).data)} disabled={loading}>AI rank (503 w/o key)</button>
               <button onClick={() => handle(async () => (await axios.post('/api/ai/offset-marketplace/intent', { vendor_id: vendorId, tonnes_co2e: tonnes, notes: intentNotes }, { headers: headers() })).data)} disabled={loading}>Record intent</button>
               <button onClick={() => handle(async () => (await axios.get('/api/ai/offset-marketplace/intents', { headers: headers() })).data)} disabled={loading}>My intents</button>
             </div>
+            <NativeAIControls busy={nativeAIRequest.busy} onCancel={() => { nativeAIRequest.cancel(); setLoading(false); }} context="carbon offset vendor ranking">
+              <h4>AI vendor ranking</h4>
+              <p style={{ color: '#888', fontSize: 12 }}>Reviewable recommendations from the curated catalog. Verify prices and project details directly before purchasing.</p>
+              <label>Target tonnes CO2e <input data-ai-field="rankingTonnes" type="number" min="0.01" step="0.01" value={rankingTonnes} onChange={(event) => setRankingTonnes(Number(event.target.value))} /></label>
+              <label>Preferences (optional) <textarea data-ai-field="rankingPreferences" value={rankingPreferences} onChange={(event) => setRankingPreferences(event.target.value)} placeholder="Budget, project types, verification standards, durability and region..." /></label>
+              <button type="button" onClick={rankOffsets} disabled={loading || rankingTonnes <= 0}>{nativeAIRequest.busy ? 'Ranking...' : 'Generate vendor ranking'}</button>
+            </NativeAIControls>
           </div>
         )}
 
@@ -131,7 +153,7 @@ const AIBacklog: React.FC<Props> = ({ user, onLogout }) => {
         )}
 
         {error && <div style={{ marginTop: 16, padding: 12, background: '#7f1d1d', color: '#fecaca', borderRadius: 4 }}>{error}</div>}
-        {result && <pre style={{ marginTop: 16, padding: 12, background: '#1f2937', color: '#e5e7eb', borderRadius: 4, maxHeight: 480, overflow: 'auto' }}>{JSON.stringify(result, null, 2)}</pre>}
+        {result && <FormattedAIReport response={result} />}
       </div>
     </div>
   );

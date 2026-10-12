@@ -1,3 +1,6 @@
+import NativeAIControls from "../components/NativeAIControls";
+import useNativeAIRequest from "../components/useNativeAIRequest";
+import FormattedAIReport from "../components/FormattedAIReport";
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -19,6 +22,8 @@ type Tool = 'trend-forecast' | 'weekly-digest' | 'community-benchmark' | 'carbon
 const DOMAINS = ['weather', 'carbon', 'energy', 'water', 'recycling'];
 
 const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
+  const nativeAIRequest = useNativeAIRequest();
+
   const [tool, setTool] = useState<Tool>('trend-forecast');
   const [domain, setDomain] = useState<string>('carbon');
   const [days, setDays] = useState<number>(7);
@@ -55,7 +60,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
         url = '/api/ai/recycling-sort';
         body = { item_description: itemDescription, municipality: municipality || undefined };
       }
-      const resp = await axios.post(url, body, { headers });
+      const resp = await nativeAIRequest.run((signal) => axios.post(url, body, { ...({ headers }), ...({ signal }) }));
       setResult(resp.data);
     } catch (err: any) {
       const status = err?.response?.status;
@@ -75,7 +80,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="feature-page">
+    <NativeAIControls busy={nativeAIRequest.busy} onCancel={nativeAIRequest.cancel} context="Environment Monitor"><div className="feature-page">
       <header className="feature-header">
         <div className="header-left">
           <Link to="/dashboard" className="back-link">← Back to Dashboard</Link>
@@ -114,13 +119,13 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
             <>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Domain</label>
-                <select className="form-input" value={domain} onChange={(e) => setDomain(e.target.value)}>
+                <select data-ai-field="domain" className="form-input" value={domain} onChange={(e) => setDomain(e.target.value)}>
                   {DOMAINS.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Days to forecast (1-90)</label>
-                <input
+                <input data-ai-field="days"
                   type="number"
                   className="form-input"
                   min={1}
@@ -142,13 +147,13 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
             <>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Domain</label>
-                <select className="form-input" value={domain} onChange={(e) => setDomain(e.target.value)}>
+                <select data-ai-field="domain" className="form-input" value={domain} onChange={(e) => setDomain(e.target.value)}>
                   {DOMAINS.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Target percentile (1-99)</label>
-                <input
+                <input data-ai-field="percentile"
                   type="number"
                   className="form-input"
                   min={1}
@@ -167,7 +172,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
               </p>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Lookback window (days, 1-365)</label>
-                <input
+                <input data-ai-field="lookbackDays"
                   type="number"
                   className="form-input"
                   min={1}
@@ -186,7 +191,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
               </p>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Item description (required)</label>
-                <input
+                <input data-ai-field="itemDescription"
                   type="text"
                   className="form-input"
                   placeholder="e.g. greasy pizza box, lithium battery, broken ceramic mug"
@@ -196,7 +201,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
               </div>
               <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Municipality / region (optional)</label>
-                <input
+                <input data-ai-field="municipality"
                   type="text"
                   className="form-input"
                   placeholder="e.g. San Francisco, CA"
@@ -235,16 +240,14 @@ const AIInsights: React.FC<AIInsightsProps> = ({ user, onLogout }) => {
         {result && (
           <div style={{ border: '1px solid var(--border-color, #444)', padding: 16, borderRadius: 8 }}>
             <h3>Result</h3>
-            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: '60vh', overflow: 'auto' }}>
-              {JSON.stringify(result, null, 2)}
-            </pre>
+            <FormattedAIReport response={result} />
             <p style={{ marginTop: 8, fontSize: 13, opacity: 0.7 }}>
               See the <Link to="/ai-results">AI Results</Link> page for full history.
             </p>
           </div>
         )}
       </div>
-    </div>
+    </div></NativeAIControls>
   );
 };
 

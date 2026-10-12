@@ -28,13 +28,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const fillDemoCredentials = async () => {
+    setError('');
     try {
       const response = await axios.get('/api/auth/demo');
       setEmail(response.data.email);
       setPassword(response.data.password);
     } catch {
-      setEmail(process.env.REACT_APP_DEMO_EMAIL || '');
-      setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
+      setError('Demo credentials are unavailable. Ask an administrator to configure the demo account.');
     }
   };
 
@@ -90,10 +90,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               type="button"
               className="btn btn-secondary login-demo-btn"
               onClick={fillDemoCredentials}
-              aria-label="Auto Fill Demo Credentials"
+              aria-label="Fill demo credentials"
             >
               <span>✨</span>
-              Auto Fill Demo Credentials
+              Fill Demo Credentials
             </button>
 
             <button type="submit" className="btn btn-primary login-btn" disabled={loading} aria-label="Sign In">

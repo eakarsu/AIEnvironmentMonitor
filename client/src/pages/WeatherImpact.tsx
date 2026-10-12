@@ -139,16 +139,14 @@ const WeatherImpact: React.FC<WeatherImpactProps> = ({ user, onLogout }) => {
     setShowDetailModal(true);
   };
 
-  const loadSampleData = () => {
-    setFormData({
-      crop_name: 'Wheat',
-      location: 'Kansas, USA',
-      weather_condition: 'Drought',
-      temperature: '38.5',
-      humidity: '25',
-      rainfall: '2.3',
-      impact_level: 'High'
-    });
+  const sampleLabels = ['Drought', 'Heavy rain', 'Cool spell'];
+  const loadSampleData = (variant: number) => {
+    const samples = [
+      { crop_name: 'Wheat', location: 'Kansas, USA', weather_condition: 'Drought', temperature: '38.5', humidity: '25', rainfall: '2.3', impact_level: 'High' },
+      { crop_name: 'Corn', location: 'Iowa, USA', weather_condition: 'Heavy rain', temperature: '24', humidity: '88', rainfall: '45', impact_level: 'Medium' },
+      { crop_name: 'Apple', location: 'Washington, USA', weather_condition: 'Cool spell', temperature: '9', humidity: '65', rainfall: '8', impact_level: 'Low' }
+    ];
+    setFormData(samples[variant]);
   };
 
   const closeModal = () => {
@@ -295,11 +293,11 @@ const WeatherImpact: React.FC<WeatherImpactProps> = ({ user, onLogout }) => {
             <div className="modal-header">
               <h2 className="modal-title">{isEditing ? 'Edit Weather Record' : 'Add Weather Record'}</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {!isEditing && (
-                  <button type="button" className="btn btn-sm btn-success" onClick={loadSampleData}>
-                    Load Sample
+                {!isEditing && sampleLabels.map((label, variant) => (
+                  <button key={label} type="button" className="btn btn-sm btn-success" onClick={() => loadSampleData(variant)}>
+                    {label} sample
                   </button>
-                )}
+                ))}
                 <button className="modal-close" onClick={closeModal}>&times;</button>
               </div>
             </div>
